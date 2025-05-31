@@ -1,0 +1,42 @@
+{
+  "name": "ia-agent",
+  "version": "1.0.0",
+  "description": "est un agent ia ",
+  "main": "agent.js",
+  "scripts": {
+    "start": "node agent.js",
+    "dev": "nodemon agent.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nouhoudiallo/ia-agent.git"
+  },
+  "author": "nouhou",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Nouhoudiallo/ia-agent/issues"
+  },
+  "homepage": "https://github.com/Nouhoudiallo/ia-agent#readme",
+  "dependencies": {
+    "@langchain/community": "^0.3.45",
+    "@langchain/core": "^0.3.57",
+    "@langchain/google-genai": "^0.2.10",
+    "@prisma/client": "^6.8.2",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "franc": "^6.2.0",
+    "langchain": "^0.3.27",
+    "mammoth": "^1.9.1",
+    "multer": "^2.0.0",
+    "pdf-parse": "^1.1.1",
+    "prisma": "^6.8.2",
+    "sqlite3": "^5.1.7"
+  },
+  "type": "module",
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

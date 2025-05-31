@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat IA Agent</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+    #chat-container { max-width: 600px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 24px; }
+    #messages { min-height: 300px; margin-bottom: 16px; }
+    .msg { margin: 8px 0; }
+    .user { color: #1976d2; font-weight: bold; }
+    .agent { color: #388e3c; font-weight: bold; }
+    #input-form { display: flex; gap: 8px; }
+    #input { flex: 1; padding: 8px; border-radius: 4px; border: 1px solid #ccc; }
+    #send { padding: 8px 16px; border: none; background: #1976d2; color: #fff; border-radius: 4px; cursor: pointer; }
+    #send:disabled { background: #aaa; }
+  </style>
+</head>
+<body>
+  <div id="chat-container">
+    <h2>Chat avec l'agent IA</h2>
+    <div id="messages"></div>
+    <form id="upload-form" enctype="multipart/form-data" style="margin-bottom:16px;">
+      <input type="file" id="file" name="file" required />
+      <input type="text" id="file-title" name="title" placeholder="Titre du document (optionnel)" />
+      <button type="submit">Uploader un document</button>
+    </form>
+    <form id="input-form">
+      <input id="input" type="text" placeholder="Votre question..." autocomplete="off" required />
+      <button id="send" type="submit">Envoyer</button>
+    </form>
+  </div>
+  <script>
+    const messagesDiv = document.getElementById('messages');
+    const form = document.getElementById('input-form');
+    const input = document.getElementById('input');
+    let history = [];
+
+    function addMessage(text, sender) {
+      const div = document.createElement('div');
+      div.className = 'msg ' + sender;
+      div.innerHTML = `<span class="${sender}">${sender === 'user' ? 'Vous' : 'Agent'} :</span> ${text}`;
+      messagesDiv.appendChild(div);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const question = input.value.trim();
+      if (!question) return;
+      addMessage(question, 'user');
+      input.value = '';
+      input.disabled = true;
+      try {
+        const res = await fetch('/api/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question, history })
+        });
+        const data = await res.json();
+        if (data.response) {
+          addMessage(data.response, 'agent');
+          history.push({ input: question, output: data.response });
+        } else {
+          addMessage("Erreur : aucune réponse de l'agent.", 'agent');
+        }
+      } catch (err) {
+        addMessage("Erreur de connexion à l'API.", 'agent');
+      }
+      input.disabled = false;
+      input.focus();
+    };
+
+    // Gestion de l'upload de fichier
+    const uploadForm = document.getElementById('upload-form');
+    uploadForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const fileInput = document.getElementById('file');
+      const titleInput = document.getElementById('file-title');
+      if (!fileInput.files.length) return;
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+      if (titleInput.value) formData.append('title', titleInput.value);
+      uploadForm.querySelector('button').disabled = true;
+      try {
+        const res = await fetch('/api/upload-file', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('Document uploadé et indexé avec succès !');
+          fileInput.value = '';
+          titleInput.value = '';
+        } else {
+          alert('Erreur : ' + (data.error || 'Upload échoué.'));
+        }
+      } catch (e) {
+        alert('Erreur lors de l’upload.');
+      }
+      uploadForm.querySelector('button').disabled = false;
+    };
+  </script>
+</body>
+</html>

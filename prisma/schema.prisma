@@ -1,0 +1,47 @@
+// Prisma schema pour l'historique des discussions
+// Ce modèle stocke chaque échange (question/réponse) avec un identifiant de session
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./db.sqlite"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  password  String   // hashé
+  createdAt DateTime @default(now())
+  messages  Message[]
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  sessionId String
+  role      String   // 'user' ou 'agent'
+  content   String
+  createdAt DateTime @default(now())
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
+}
+
+model Document {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  chunks    DocumentChunk[]
+}
+
+model DocumentChunk {
+  id         Int      @id @default(autoincrement())
+  content    String
+  embedding  String  // Stocké en JSON (array de float)
+  document   Document @relation(fields: [documentId], references: [id])
+  documentId Int
+  createdAt  DateTime @default(now())
+}
