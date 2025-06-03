@@ -2,7 +2,7 @@
   "name": "ia-agent",
   "version": "1.0.0",
   "description": "est un agent ia ",
-  "main": "agent.js",
+  "main": "dist/agent.js",
   "scripts": {
     "start": "node dist/agent.js",
     "dev": "cp chat.html dist/ && tsx watch agent.ts",
