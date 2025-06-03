@@ -34,12 +34,13 @@ export class ApiFactory {
   static apiRoute(
     method: HttpMethod,
     path: string,
-    handler: (req: Request, res: Response, next: NextFunction) => Promise<any> | void
+    middleware: (req: Request, res: Response, next: NextFunction) => Promise<any> | void,
+    handler: (req: Request, res: Response) => Promise<any> | void
   ): Router {
     const router = express.Router();
-    router[method](path, apiKeyMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+    router[method](path, middleware, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        await handler(req, res, next);
+        await handler(req, res);
       } catch (e) {
         next(e);
       }

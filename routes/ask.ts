@@ -10,7 +10,7 @@ import { initializeAgentExecutorWithOptions } from "langchain/agents";
 import { ApiFactory } from "../utils/apiFactory.js";
 import { apiKeyMiddleware } from '../utils/apiFactory.js';
 
-export default ApiFactory.apiRoute("post", "/ask", async (req: Request, res: Response) => {
+export default ApiFactory.apiRoute("post", "/ask",apiKeyMiddleware, async (req: Request, res: Response) => {
   let { question, userId, discussionId } = req.body as { question: string; userId: string; discussionId?: string };
   if (!userId) {
     return res.status(401).json({ error: "Vous devez être connecté pour discuter avec l'agent." });

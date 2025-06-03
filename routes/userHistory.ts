@@ -6,7 +6,7 @@ export default ApiFactory.apiRoute("get", "/user-history", apiKeyMiddleware, asy
   const { email } = req.query as { email?: string };
   if (!email) return res.status(400).json({ error: "Email requis" });
   const user = await getUserByEmail(email);
-  if (!user) return res.json({ history: [] });
+  if (!user) return res.status(404).json({ error: "Utilisateur non trouvé" });
   const messages = await getUserMessages(user.id);
   res.json({ history: messages });
 });

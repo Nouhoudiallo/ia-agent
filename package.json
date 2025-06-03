@@ -5,8 +5,8 @@
   "main": "agent.js",
   "scripts": {
     "start": "node dist/agent.js",
-    "dev": "nodemon --watch './**/*.ts' --exec 'ts-node --esm agent.ts'",
-    "build": "tsc --project tsconfig.json && prisma generate && prisma migrate deploy",
+    "dev": "cp chat.html dist/ && tsx watch agent.ts",
+    "build": "tsc --project tsconfig.json && prisma generate && prisma migrate deploy && cp chat.html dist/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

@@ -21,8 +21,8 @@ const loginHandler = async (req: Request, res: Response) => {
   res.json({ success: true });
 };
 
-export const signupRoute = ApiFactory.apiRoute("post", "/user/signup", signupHandler);
-export const loginRoute = ApiFactory.apiRoute("post", "/user/login", loginHandler);
+export const signupRoute = ApiFactory.apiRoute("post", "/user/signup",apiKeyMiddleware, signupHandler);
+export const loginRoute = ApiFactory.apiRoute("post", "/user/login",apiKeyMiddleware, loginHandler);
 
 // Pour compatibilité avec l'import par défaut
 import express from "express";

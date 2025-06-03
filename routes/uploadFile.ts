@@ -1,4 +1,4 @@
-import { ApiFactory } from "../utils/apiFactory.js";
+import { ApiFactory, apiKeyMiddleware } from "../utils/apiFactory.js";
 import { Request, Response } from "express";
 import fs from "fs";
 import mammoth from "mammoth";
@@ -6,7 +6,7 @@ import { saveDocument, saveDocumentChunks } from "../tools/db.js";
 import { getGeminiEmbeddings } from "../tools/model.js";
 import { chunkText } from "../utils/text.js";
 
-export default ApiFactory.apiRoute("post", "/upload-file", async (req: Request, res: Response) => {
+export default ApiFactory.apiRoute("post", "/upload-file",apiKeyMiddleware, async (req: Request, res: Response) => {
   const file = req.file as Express.Multer.File;
   const title = req.body.title || (file ? file.originalname : "");
   if (!file || !fs.existsSync(file.path)) {
