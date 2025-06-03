@@ -1,5 +1,5 @@
 import * as dotenv from "dotenv";
-import express from "express";
+import express, { Request, Response } from "express";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -8,8 +8,9 @@ import askRoute from "./routes/ask.js";
 import uploadDocRoute from "./routes/uploadDoc.js";
 import uploadFileRoute from "./routes/uploadFile.js";
 import userHistoryRoute from "./routes/userHistory.js";
-import authRoute from "./routes/auth.js";
+import apiKeyRoute from "./routes/apiKey.js";
 
+// Chargement des variables d'environnement
 dotenv.config();
 
 const app = express();
@@ -26,15 +27,10 @@ app.use("/api", askRoute);
 app.use("/api", uploadDocRoute);
 app.use("/api", uploadFileRoute);
 app.use("/api", userHistoryRoute);
-app.use("/api", authRoute);
+app.use("/api", apiKeyRoute);
 
-
-app.get("/", (req, res) => {
+app.get("/", (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, "chat.html"));
-});
-
-app.get("/dashboard", (req, res) => {
-  res.sendFile(path.join(__dirname, "dashboard.html"));
 });
 
 app.listen(3000, () => {

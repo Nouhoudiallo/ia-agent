@@ -1,15 +1,13 @@
-import express from "express";
+import { ApiFactory } from "../utils/apiFactory.js";
+import { Request, Response } from "express";
 import fs from "fs";
 import mammoth from "mammoth";
 import { saveDocument, saveDocumentChunks } from "../tools/db.js";
 import { getGeminiEmbeddings } from "../tools/model.js";
 import { chunkText } from "../utils/text.js";
 
-const router = express.Router();
-
-// Middleware multer doit être appliqué dans le fichier principal (app.js/server.js)
-router.post("/upload-file", async (req, res) => {
-  const file = req.file;
+export default ApiFactory.apiRoute("post", "/upload-file", async (req: Request, res: Response) => {
+  const file = req.file as Express.Multer.File;
   const title = req.body.title || (file ? file.originalname : "");
   if (!file || !fs.existsSync(file.path)) {
     console.error("[UPLOAD] Fichier manquant ou introuvable:", file ? file.path : null);
@@ -44,5 +42,3 @@ router.post("/upload-file", async (req, res) => {
     res.status(500).json({ error: "Erreur lors du traitement du fichier." });
   }
 });
-
-export default router;

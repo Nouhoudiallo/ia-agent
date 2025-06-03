@@ -4,8 +4,9 @@
   "description": "est un agent ia ",
   "main": "agent.js",
   "scripts": {
-    "start": "node agent.js",
-    "dev": "nodemon agent.js",
+    "start": "node dist/agent.js",
+    "dev": "nodemon --watch './**/*.ts' --exec 'ts-node --esm agent.ts'",
+    "build": "tsc --project tsconfig.json && prisma generate && prisma migrate deploy",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -26,7 +27,7 @@
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
-    "express": "^5.1.0",
+    "express": "^4.21.2",
     "franc": "^6.2.0",
     "langchain": "^0.3.27",
     "mammoth": "^1.9.1",
@@ -37,6 +38,15 @@
   },
   "type": "module",
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.18",
+    "@types/express": "^4.17.22",
+    "@types/fs-extra": "^11.0.4",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.15.29",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
   }
 }

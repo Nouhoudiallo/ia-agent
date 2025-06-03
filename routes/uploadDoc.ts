@@ -1,10 +1,9 @@
-import express from "express";
+import { ApiFactory } from "../utils/apiFactory.js";
+import { Request, Response } from "express";
 import { saveDocument } from "../tools/db.js";
 
-const router = express.Router();
-
-router.post("/upload-doc", async (req, res) => {
-  const { title, content } = req.body;
+export default ApiFactory.apiRoute("post", "/upload-doc", async (req: Request, res: Response) => {
+  const { title, content } = req.body as { title: string; content: string };
   if (!title || !content) {
     return res.status(400).json({ error: "Titre et contenu requis." });
   }
@@ -15,5 +14,3 @@ router.post("/upload-doc", async (req, res) => {
     res.status(500).json({ error: "Erreur lors de l'enregistrement du document." });
   }
 });
-
-export default router;

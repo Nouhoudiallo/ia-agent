@@ -1,0 +1,2 @@
+// Ce fichier doit contenir la clé API générée côté front (copier-coller la valeur ici pour la démo)
+// Exemple : 123e4567-e89b-12d3-a456-426614174000

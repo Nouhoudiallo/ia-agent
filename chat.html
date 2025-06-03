@@ -30,12 +30,17 @@
       <input id="input" type="text" placeholder="Votre question..." autocomplete="off" required />
       <button id="send" type="submit">Envoyer</button>
     </form>
+    <form id="api-key-form" style="margin-bottom:16px;">
+      <input type="text" id="api-key" placeholder="Clé API (sera utilisée pour toutes les requêtes)" readonly style="width:60%" />
+      <button type="button" id="generate-api-key">Générer une clé API</button>
+    </form>
   </div>
   <script>
     const messagesDiv = document.getElementById('messages');
     const form = document.getElementById('input-form');
     const input = document.getElementById('input');
-    let history = [];
+    let userId = "";
+    let discussionId = "";
 
     function addMessage(text, sender) {
       const div = document.createElement('div');
@@ -43,6 +48,69 @@
       div.innerHTML = `<span class="${sender}">${sender === 'user' ? 'Vous' : 'Agent'} :</span> ${text}`;
       messagesDiv.appendChild(div);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    // Demande l'ID utilisateur au chargement
+    async function askIds() {
+      userId = prompt("Entrez votre userId (UUID, ex: celui du testeur)") || "";
+      if (!userId) {
+        alert("userId est obligatoire pour discuter avec l'agent.");
+      }
+      // On ne demande plus discussionId, il sera créé automatiquement au premier message
+    }
+    askIds();
+
+    // Section gestion clé API
+    const apiKeyInput = document.getElementById('api-key');
+    const generateApiKeyBtn = document.getElementById('generate-api-key');
+    // Récupère la clé API depuis le backend (si existante)
+    async function fetchApiKeyFromServer() {
+      try {
+        const res = await fetch('/api/get-api-key');
+        const data = await res.json();
+        if (data.key) {
+          setApiKey(data.key);
+        }
+      } catch (e) {}
+    }
+    fetchApiKeyFromServer();
+    // Génère une clé API aléatoire (UUID v4 simple)
+    function generateApiKey() {
+      return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+      );
+    }
+    // Stocke la clé API localement, l'affiche et la sauvegarde côté serveur
+    async function setApiKey(key) {
+      localStorage.setItem('apiKey', key);
+      apiKeyInput.value = key;
+      // Enregistre la clé côté serveur
+      await fetch('/api/generate-api-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key })
+      });
+    }
+    // Au clic, génère et stocke une nouvelle clé API
+    generateApiKeyBtn.onclick = async () => {
+      const key = generateApiKey();
+      await setApiKey(key);
+      alert('Nouvelle clé API générée et enregistrée !');
+    };
+    // Au chargement, restaure la clé API si présente
+    const savedKey = localStorage.getItem('apiKey');
+    if (savedKey) apiKeyInput.value = savedKey;
+
+    // Ajoute la clé API à chaque requête
+    async function fetchWithApiKey(url, options = {}) {
+      const key = localStorage.getItem('apiKey');
+      if (!key) {
+        alert('Veuillez générer une clé API avant de continuer.');
+        throw new Error('Clé API manquante');
+      }
+      options.headers = options.headers || {};
+      options.headers['x-api-key'] = key;
+      return fetch(url, options);
     }
 
     form.onsubmit = async (e) => {
@@ -53,17 +121,20 @@
       input.value = '';
       input.disabled = true;
       try {
-        const res = await fetch('/api/ask', {
+        const res = await fetchWithApiKey('/api/ask', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ question, history })
+          body: JSON.stringify({ question, userId, discussionId })
         });
         const data = await res.json();
         if (data.response) {
           addMessage(data.response, 'agent');
-          history.push({ input: question, output: data.response });
+          // Si une nouvelle discussion a été créée, on récupère son ID pour la suite
+          if (data.discussionId) {
+            discussionId = data.discussionId;
+          }
         } else {
-          addMessage("Erreur : aucune réponse de l'agent.", 'agent');
+          addMessage("Erreur : " + (data.error || "aucune réponse de l'agent."), 'agent');
         }
       } catch (err) {
         addMessage("Erreur de connexion à l'API.", 'agent');
@@ -84,7 +155,7 @@
       if (titleInput.value) formData.append('title', titleInput.value);
       uploadForm.querySelector('button').disabled = true;
       try {
-        const res = await fetch('/api/upload-file', {
+        const res = await fetchWithApiKey('/api/upload-file', {
           method: 'POST',
           body: formData
         });

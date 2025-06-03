@@ -1,7 +1,6 @@
-// Découpe un texte en chunks de 500 tokens environ (simple split par phrases)
-function chunkText(text, chunkSize = 1500) {
+export function chunkText(text: string, chunkSize: number = 1500): string[] {
   const sentences = text.split(/(?<=[.!?])\s+/);
-  let chunks = [], current = "";
+  let chunks: string[] = [], current = "";
   for (const s of sentences) {
     if ((current + s).length > chunkSize) {
       if (current) chunks.push(current);
@@ -13,5 +12,3 @@ function chunkText(text, chunkSize = 1500) {
   if (current) chunks.push(current);
   return chunks;
 }
-
-export { chunkText };
